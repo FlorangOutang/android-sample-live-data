@@ -14,8 +14,8 @@ import fr.ekito.myweatherapp.view.LoadingState
 import fr.ekito.myweatherapp.view.State
 
 class WeatherViewModel(
-    private val weatherRepository: WeatherRepository,
-    private val schedulerProvider: SchedulerProvider
+        private val weatherRepository: WeatherRepository,
+        private val schedulerProvider: SchedulerProvider
 ) : RxViewModel() {
 
     private val mStates = MutableLiveData<State>()
@@ -23,17 +23,17 @@ class WeatherViewModel(
         get() = mStates
 
     private val mEvents = SingleLiveEvent<Event>()
-    val events : LiveData<Event>
+    val events: LiveData<Event>
         get() = mEvents
 
-    fun loadNewLocation(location: String) {
-        mEvents.value = LoadingLocationEvent(location)
+    fun loadNewLocation(newLocation: String) {
+        mEvents.value = LoadingLocationEvent(newLocation)
         launch {
-            weatherRepository.getWeather()
+            weatherRepository.getWeather(newLocation)
                     .with(schedulerProvider)
                     .subscribe(
                             { weather -> mStates.value = WeatherListState.from(weather) },
-                            { error -> mEvents.value = LoadLocationFailedEvent(location, error) })
+                            { error -> mEvents.value = LoadLocationFailedEvent(newLocation, error) })
         }
     }
 
@@ -41,10 +41,10 @@ class WeatherViewModel(
         mStates.value = LoadingState
         launch {
             weatherRepository.getWeather()
-                .with(schedulerProvider)
-                .subscribe(
-                    { weather -> mStates.value = WeatherListState.from(weather)},
-                    { error -> mStates.value = ErrorState(error) })
+                    .with(schedulerProvider)
+                    .subscribe(
+                            { weather -> mStates.value = WeatherListState.from(weather) },
+                            { error -> mStates.value = ErrorState(error) })
         }
     }
 
